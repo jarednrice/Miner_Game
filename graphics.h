@@ -11,3 +11,6 @@
 #define PLAYER_PAIR 4
 #define ELEVATOR_PAIR 5
 #define TRAIL_PAIR 6
+
+int screenSetUp();
+int colorSetUp();
