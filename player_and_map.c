@@ -7,16 +7,19 @@ Level * mapSetUp(){
   struct winsize size;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
 
+  /* size of terminal */
   newLevel->window.height = size.ws_row;
   newLevel->window.width = size.ws_col;
 
-  //printf("%d %d\n", newLevel->window.height, newLevel->window.width);
+  /* create and draw the money store */
+  Shop shop = shopSetup(newLevel);
+
   int i;
   int j;
   int first_layer = newLevel->window.height/5 + 1;
   int r;
 
-  // attron(COLOR_PAIR(EARTH_PAIR));
+  /* Loop to draw map. A bit hacked together */
   for(i = newLevel->window.height; i > newLevel->window.height/5; i--){
     r = rand() % (newLevel->window.width - 1);
     for(j = 0; j < newLevel->window.width; j++){
@@ -26,9 +29,13 @@ Level * mapSetUp(){
         attroff(COLOR_PAIR(ELEVATOR_PAIR));
       }
       else if(i == first_layer){ // surface
-        attron(COLOR_PAIR(GRASS_PAIR));
-        mvprintw(i, j, "^");
-        attron(COLOR_PAIR(GRASS_PAIR));
+        if((j < shop.position_start.x) || (j > shop.position_end.x)){
+          attron(COLOR_PAIR(GRASS_PAIR));
+          mvprintw(i, j, "^");
+          attron(COLOR_PAIR(GRASS_PAIR));
+        }
+        else
+          mvprintw(i, j, "-");
       }
       else if(i == first_layer + 1){ //layer just below surface
         attron(COLOR_PAIR(EARTH_PAIR));
@@ -50,6 +57,26 @@ Level * mapSetUp(){
   // attroff(COLOR_PAIR(EARTH_PAIR));
 
   return newLevel;
+}
+
+Shop shopSetup(Level * level){
+  // Can I return stuff that isn't malloced lmao
+  Shop shop;
+  shop.position_start.y = level->window.height/5;
+  shop.position_start.x = 2 * level->window.width/3;
+  shop.position_end.x = 2 * level->window.width/3 + 8;
+  int y = shop.position_start.y;
+  int x = shop.position_start.x;
+
+  mvprintw(y, x, "|");
+  mvprintw(y - 1, x, "|");
+  mvprintw(y - 1, x, "|");
+  mvprintw(y , x + 4, "$");
+  mvprintw(y - 2, x, "=========");
+  mvprintw(y, x + 8, "|");
+  mvprintw(y - 1, x + 8, "|");
+
+  return shop;
 }
 
 Player * playerSetup(Level * level){

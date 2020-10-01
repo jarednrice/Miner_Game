@@ -27,8 +27,14 @@ typedef struct Player{
   // Room * room;
 } Player;
 
+typedef struct Shop{
+  Position position_start;
+  Position position_end;
+} Shop;
+
 Level * mapSetUp();
 Player * playerSetup(Level * level);
+Shop shopSetup(Level * level);
 int playerMove(int y, int x, Player * user);
 int handleInput(int input, Player * user);
 int checkPos(int newY, int newX, Player * user);
