@@ -1,5 +1,6 @@
 #include "common.h"
 #include "graphics.h"
+#include "inventory.h"
 
 typedef struct Window {
   int width;
@@ -20,6 +21,7 @@ typedef struct Shop{
 typedef struct Level{
   Position position;
   Window window;
+  int surface;
   /* buildings */
   Shop shop;
   // Monster ** monsters;
@@ -30,7 +32,8 @@ typedef struct Player{
   Position position;
   Window window;
   int health;
-  int inventory[2];
+  int money;
+  int inventory[3];
   /* Player needs to "know"
   where buildings are to
   use them etc*/
@@ -44,3 +47,4 @@ Shop shopSetup(Level * level);
 int handleInput(int input, Player * user);
 int checkPos(Position newPos, Player * user);
 int playerMove(Position newPos, Player * user);
+bool mining(Player * user, char ore);

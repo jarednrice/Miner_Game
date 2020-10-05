@@ -5,6 +5,7 @@
 #define GRASS '^'
 #define TRAIL '.'
 #define FLOOR '_'
+#define IRON '?'
 
 #define EARTH_PAIR  1
 #define ORE_PAIR  2
