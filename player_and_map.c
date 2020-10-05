@@ -11,8 +11,8 @@ Level * mapSetUp(){
   newLevel->window.height = size.ws_row;
   newLevel->window.width = size.ws_col;
 
-  /* create and draw the money store */
-  Shop shop = shopSetup(newLevel);
+  /* create and draw the buildings */
+  newLevel->shop = shopSetup(newLevel);
 
   int i;
   int j;
@@ -29,13 +29,15 @@ Level * mapSetUp(){
         attroff(COLOR_PAIR(ELEVATOR_PAIR));
       }
       else if(i == first_layer){ // surface
-        if((j < shop.position_start.x) || (j > shop.position_end.x)){
+        if((j > newLevel->shop.position_start.x - 1) &&
+          (j < newLevel->shop.position_end.x + 1)){ // location of shop floor
+            continue;
+        }
+        else {
           attron(COLOR_PAIR(GRASS_PAIR));
           mvprintw(i, j, "^");
           attron(COLOR_PAIR(GRASS_PAIR));
         }
-        else
-          mvprintw(i, j, "-");
       }
       else if(i == first_layer + 1){ //layer just below surface
         attron(COLOR_PAIR(EARTH_PAIR));
@@ -68,13 +70,19 @@ Shop shopSetup(Level * level){
   int y = shop.position_start.y;
   int x = shop.position_start.x;
 
+  attron(COLOR_PAIR(SHOP_PAIR));
+  /* walls */
   mvprintw(y, x, "|");
   mvprintw(y - 1, x, "|");
   mvprintw(y - 1, x, "|");
-  mvprintw(y , x + 4, "$");
-  mvprintw(y - 2, x, "=========");
   mvprintw(y, x + 8, "|");
   mvprintw(y - 1, x + 8, "|");
+  /* roof and floor */
+  mvprintw(y - 2, x, "=========");
+  mvprintw(y + 1, x, "_________");
+  /* logo */
+  mvprintw(y , x + 4, "$");
+  attroff(COLOR_PAIR(SHOP_PAIR));
 
   return shop;
 }
@@ -89,79 +97,100 @@ Player * playerSetup(Level * level){
   newPlayer->position.x = newPlayer->window.width/2;
   newPlayer->position.y = newPlayer->window.height/5 + 1;
 
+  /* initialize building info that player must "know" */
+  newPlayer->shop = level->shop;
+
   /* initialize health and inventory */
   newPlayer->health = 20;
   newPlayer->inventory[0] = 0;
   newPlayer->inventory[1] = 0;
 
-  playerMove(newPlayer->position.y, newPlayer->position.x, newPlayer);
+  playerMove(newPlayer->position, newPlayer);
 
   return newPlayer;
 }
 
 int handleInput(int input, Player * user){
-  int newY;
-  int newX;
+  Position newPos;
 
   switch (input) {
     case 'w':
-      newY = user->position.y - 1;
-      newX = user->position.x;
+      newPos.y = user->position.y - 1;
+      newPos.x = user->position.x;
       break;
     case 'a':
-      newY = user->position.y;
-      newX = user->position.x - 1;
+      newPos.y = user->position.y;
+      newPos.x = user->position.x - 1;
       break;
     case 's':
-      newY = user->position.y + 1;
-      newX = user->position.x;
+      newPos.y = user->position.y + 1;
+      newPos.x = user->position.x;
       break;
     case 'd':
-      newY = user->position.y;
-      newX = user->position.x + 1;
+      newPos.y = user->position.y;
+      newPos.x = user->position.x + 1;
       break;
     default: break;
   }
 
-  checkPos(newY, newX, user);
+  checkPos(newPos, user);
 }
 
-int checkPos(int newY, int newX, Player * user){
+int checkPos(Position newPos, Player * user){
+  /* save old postions for functions */
+  Position oldPos;
+  oldPos.y = user->position.y;
+  oldPos.x = user->position.x;
+
   /* have to bitmask the char to 'remove' the color attribute
     for condition checking */
-  int testch = mvinch(newY, newX);
+  int testch = mvinch(newPos.y, newPos.x);
   switch(testch & A_CHARTEXT){
     case TRAIL:
     case GRASS:
     case ELEVATOR:
     case EARTH:
-      playerMove(newY, newX, user);
+    case FLOOR:
+      playerMove(newPos, user);
       break;
     default:
-      move(user->position.y, user->position.x);
+      move(oldPos.y, oldPos.x);
       break;
   }
 }
 
-int playerMove(int y, int x, Player * user){
-  if(user->position.y == user->window.height/5 + 1){
-    attron(COLOR_PAIR(GRASS_PAIR));
-    mvprintw(user->position.y, user->position.x, "^");
-    attroff(COLOR_PAIR(GRASS_PAIR));
+int playerMove(Position newPos, Player * user){
+  Position oldPos;
+  oldPos.y = user->position.y;
+  oldPos.x = user->position.x;
+
+  /* Dont' want all blocks to be replaced by '.' */
+  if(oldPos.y == user->window.height/5 + 1){
+    if((oldPos.x > user->shop.position_start.x - 1) &&
+      (oldPos.x < user->shop.position_end.x + 1)){
+      attron(COLOR_PAIR(SHOP_PAIR));
+      mvprintw(oldPos.y, oldPos.x, "_");
+      attroff(COLOR_PAIR(SHOP_PAIR));
+    }
+    else {
+      attron(COLOR_PAIR(GRASS_PAIR));
+      mvprintw(oldPos.y, oldPos.x, "^");
+      attroff(COLOR_PAIR(GRASS_PAIR));
+    }
   }
-  else if(user->position.x == user->window.width - 1){
+  else if(oldPos.x == user->window.width - 1){
     attron(COLOR_PAIR(ELEVATOR_PAIR));
-    mvprintw(user->position.y, user->position.x, "#");
+    mvprintw(oldPos.y, oldPos.x, "#");
     attroff(COLOR_PAIR(ELEVATOR_PAIR));
   }
   else{
     attron(COLOR_PAIR(TRAIL_PAIR));
-    mvprintw(user->position.y, user->position.x, ".");
+    mvprintw(oldPos.y, oldPos.x, ".");
     attroff(COLOR_PAIR(TRAIL_PAIR));
   }
 
-  user->position.y = y;
-  user->position.x = x;
+  user->position.y = newPos.y;
+  user->position.x = newPos.x;
 
   attron(COLOR_PAIR(PLAYER_PAIR));
   mvprintw(user->position.y, user->position.x, "@");

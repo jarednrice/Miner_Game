@@ -5,13 +5,16 @@
 
 int main(){
   Player * user;
+  Shop shop;
   Level * level;
   int ch;
 
+  /* set up screen and visual info */
   screenSetUp();
   colorSetUp();
-  level = mapSetUp();
 
+  /* set up earth level and player info */
+  level = mapSetUp();
   user = playerSetup(level);
 
   /* main game loop */

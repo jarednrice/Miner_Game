@@ -20,5 +20,6 @@ int colorSetUp() {
   init_pair(PLAYER_PAIR, COLOR_WHITE, COLOR_BLACK);
   init_pair(ELEVATOR_PAIR, COLOR_WHITE, COLOR_CYAN);
   init_pair(TRAIL_PAIR, COLOR_WHITE, COLOR_BLACK);
+  init_pair(SHOP_PAIR, COLOR_WHITE, COLOR_RED);
   // clear();
 }

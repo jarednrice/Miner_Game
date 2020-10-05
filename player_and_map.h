@@ -12,9 +12,16 @@ typedef struct Position {
   // TILE_TYPE tile;
 } Position;
 
+typedef struct Shop{
+  Position position_start;
+  Position position_end;
+} Shop;
+
 typedef struct Level{
   Position position;
   Window window;
+  /* buildings */
+  Shop shop;
   // Monster ** monsters;
   // Item ** items;
 } Level;
@@ -24,17 +31,16 @@ typedef struct Player{
   Window window;
   int health;
   int inventory[2];
+  /* Player needs to "know"
+  where buildings are to
+  use them etc*/
+  Shop shop;
   // Room * room;
 } Player;
-
-typedef struct Shop{
-  Position position_start;
-  Position position_end;
-} Shop;
 
 Level * mapSetUp();
 Player * playerSetup(Level * level);
 Shop shopSetup(Level * level);
-int playerMove(int y, int x, Player * user);
 int handleInput(int input, Player * user);
-int checkPos(int newY, int newX, Player * user);
+int checkPos(Position newPos, Player * user);
+int playerMove(Position newPos, Player * user);
