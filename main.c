@@ -19,6 +19,7 @@ int main(){
 
   /* main game loop */
   while((ch = getch()) != 'q'){
+    HUD(user);
     handleInput(ch, user);
   }
   endwin();

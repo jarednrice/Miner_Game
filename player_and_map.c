@@ -220,10 +220,38 @@ bool mining(Player * user, char ore){
   int j = user->inventory[PICK_SLOT]; // what type of pick axe does the player have?
   if(ore == IRON && j >= IRON_PICK){
     int i = user->inventory[IRON_SLOT];
-    user->inventory[IRON_SLOT] = i++;
+    user->inventory[IRON_SLOT] = ++i;
     mvprintw(1, 0, "Got iron ore!");
     return true;
   }
   else
     return false;
+}
+
+void HUD(Player * user){
+  /* ores */
+  /* allocate mem for strings */
+  /* set init data */
+  char * iron_string = (char*) malloc(7); 
+  strcpy(iron_string, "Iron: ");
+
+  int length = snprintf(NULL, 0, "%d",  user->inventory[IRON_SLOT]);  
+  char * num = (char*) malloc (length + 1);
+  snprintf(num, length + 1, "%d",  user->inventory[IRON_SLOT]);
+  
+  iron_string = (char*) realloc(iron_string, (strlen(iron_string) + strlen(num) + 2));
+  strcat(iron_string, num); 
+  mvprintw(3, 0, iron_string);
+
+  /* pickaxe */
+  char * pick_string = (char*) malloc(11);
+  strcpy(pick_string, "Pick axe: ");
+  
+  int pick = user->inventory[PICK_SLOT];
+  switch(pick){
+    case IRON_PICK:
+      pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
+      strcat(pick_string, "Iron");
+      mvprintw(3, 10, pick_string); 
+  }
 }
