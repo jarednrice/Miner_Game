@@ -5,3 +5,4 @@
 
 /* specific item values */
 #define IRON_PICK 1
+#define IRON_SWORD 1

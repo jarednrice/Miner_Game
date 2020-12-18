@@ -254,4 +254,20 @@ void HUD(Player * user){
       strcat(pick_string, "Iron");
       mvprintw(3, 10, pick_string); 
   }
+
+  /* weapon */
+  char * weap_string = (char*) malloc(9);
+  strcpy(weap_string, "Weapon: ");
+
+  int weapon = user->inventory[WEAPON_SLOT];
+  switch(weapon){
+    case IRON_SWORD:
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 13));
+      strcat(weap_string, "Iron Sword"); 
+      mvprintw(3, 30, weap_string);
+    default:
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 11)); 
+      strcat(weap_string, "No weapon");
+      mvprintw(3, 27, weap_string); 
+  }
 }
