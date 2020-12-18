@@ -26,10 +26,12 @@ Level * mapSetUp(){
   int i;
   int j;
   int r;
+  int r_2;
 
   /* Loop to draw map. A bit hacked together */
   for(i = newLevel->window.height; i > newLevel->surface - 1; i--){
     r = rand() % (newLevel->window.width - 1);
+    r_2 = rand() % (newLevel->window.width - 1);
     for(j = 0; j < newLevel->window.width; j++){
       if(j == newLevel->window.width - 1){ // elevator at end of screen
         attron(COLOR_PAIR(ELEVATOR_PAIR));
@@ -55,6 +57,11 @@ Level * mapSetUp(){
       else if(j == r) { // ores
         attron(COLOR_PAIR(ORE_PAIR));
         mvprintw(i, j, "?");
+        attroff(COLOR_PAIR(ORE_PAIR));
+      }
+      else if(j == r_2) { // ores
+        attron(COLOR_PAIR(ORE_PAIR));
+        mvprintw(i, j, "S");
         attroff(COLOR_PAIR(ORE_PAIR));
       }
       else {  // everything else
@@ -116,6 +123,7 @@ Player * playerSetup(Level * level){
   newPlayer->inventory[PICK_SLOT] = IRON_PICK;  // start with iron pick axe
   newPlayer->inventory[WEAPON_SLOT] = 0;  // weapon
   newPlayer->inventory[IRON_SLOT] = 0;  // ore starting with iron
+  newPlayer->inventory[SILVER_SLOT] = 0;  // why does this break the floor tiles???
 
   playerMove(newPlayer->position, newPlayer);
 
@@ -171,6 +179,12 @@ int checkPos(Position newPos, Player * user){
       else
         move(oldPos.y, oldPos.x);
       break;
+    case SILVER:
+      if(mining(user, SILVER))
+        playerMove(newPos, user);
+      else
+        move(oldPos.y, oldPos.x);
+      break;
     default:
       move(oldPos.y, oldPos.x);
       break;
@@ -222,6 +236,12 @@ bool mining(Player * user, char ore){
     int i = user->inventory[IRON_SLOT];
     user->inventory[IRON_SLOT] = ++i;
     mvprintw(1, 0, "Got iron ore!");
+    return true;
+  }
+  else if(ore == SILVER && j >= IRON_PICK){
+    int i = user->inventory[SILVER_SLOT];
+    user->inventory[SILVER_SLOT] = ++i;
+    mvprintw(1, 0, "Got silver ore!");
     return true;
   }
   else

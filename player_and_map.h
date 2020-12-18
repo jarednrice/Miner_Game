@@ -34,7 +34,7 @@ typedef struct Player{
   Window window;
   int health;
   int money;
-  int inventory[3];
+  int inventory[4];
   /* Player needs to "know"
   where buildings are to
   use them etc*/

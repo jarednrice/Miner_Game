@@ -6,6 +6,7 @@
 #define TRAIL '.'
 #define FLOOR '_'
 #define IRON '?'
+#define SILVER 'S'
 
 #define EARTH_PAIR  1
 #define ORE_PAIR  2
