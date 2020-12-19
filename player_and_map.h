@@ -50,3 +50,5 @@ int checkPos(Position newPos, Player * user);
 int playerMove(Position newPos, Player * user);
 bool mining(Player * user, char ore);
 void HUD(Player * user);
+void crafting(Player * user);
+void clear_text(int y, int x, int end_x);

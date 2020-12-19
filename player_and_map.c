@@ -120,7 +120,7 @@ Player * playerSetup(Level * level){
   /* initialize health, money, and inventory */
   newPlayer->health = 20;
   newPlayer->money = 0;
-  newPlayer->inventory[PICK_SLOT] = IRON_PICK;  // start with iron pick axe
+  newPlayer->inventory[PICK_SLOT] = COP_PICK;  // start with copper pick axe
   newPlayer->inventory[WEAPON_SLOT] = 0;  // weapon
   newPlayer->inventory[IRON_SLOT] = 0;  // ore starting with iron
   newPlayer->inventory[SILVER_SLOT] = 0;  // why does this break the floor tiles???
@@ -203,6 +203,8 @@ int playerMove(Position newPos, Player * user){
       attron(COLOR_PAIR(SHOP_PAIR));
       mvprintw(oldPos.y, oldPos.x, "_");
       attroff(COLOR_PAIR(SHOP_PAIR));
+      /* Player is in shop */
+      crafting(user);
     }
     else {
       attron(COLOR_PAIR(GRASS_PAIR));
@@ -232,15 +234,20 @@ int playerMove(Position newPos, Player * user){
 
 bool mining(Player * user, char ore){
   int j = user->inventory[PICK_SLOT]; // what type of pick axe does the player have?
-  if(ore == IRON && j >= IRON_PICK){
+  /* clear extra chars for display message */
+  clear_text(1, 0, 15);
+  
+  if(ore == IRON && j >= COP_PICK){
     int i = user->inventory[IRON_SLOT];
     user->inventory[IRON_SLOT] = ++i;
+    HUD(user);
     mvprintw(1, 0, "Got iron ore!");
     return true;
   }
   else if(ore == SILVER && j >= IRON_PICK){
     int i = user->inventory[SILVER_SLOT];
     user->inventory[SILVER_SLOT] = ++i;
+    HUD(user);
     mvprintw(1, 0, "Got silver ore!");
     return true;
   }
@@ -250,6 +257,8 @@ bool mining(Player * user, char ore){
 
 void HUD(Player * user){
   /* ores */
+  
+  /* iron */
   /* allocate mem for strings */
   /* set init data */
   char * iron_string = (char*) malloc(7); 
@@ -263,17 +272,35 @@ void HUD(Player * user){
   strcat(iron_string, num); 
   mvprintw(3, 0, iron_string);
 
+  /* silver */
+  char * silver_string = (char*) malloc(9); 
+  strcpy(silver_string, "Silver: ");
+
+  length = snprintf(NULL, 0, "%d",  user->inventory[SILVER_SLOT]);  
+  snprintf(num, length + 1, "%d",  user->inventory[SILVER_SLOT]);
+  
+  silver_string = (char*) realloc(silver_string, (strlen(silver_string) + strlen(num) + 2));
+  strcat(silver_string, num); 
+  mvprintw(4, 0, silver_string);
+
   /* pickaxe */
   char * pick_string = (char*) malloc(11);
   strcpy(pick_string, "Pick axe: ");
   
   int pick = user->inventory[PICK_SLOT];
-  switch(pick){
-    case IRON_PICK:
-      pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
-      strcat(pick_string, "Iron");
-      mvprintw(3, 10, pick_string); 
+  /* would do as a switch but it causes an issue with displaying the strings */
+  if(pick == COP_PICK){
+    pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
+    strcat(pick_string, "Copper");
+    mvprintw(3, 10, pick_string); 
   }
+  else if(pick == IRON_PICK){
+    /* clear extra chars */
+    clear_text(3, 10, 30);
+    pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
+    strcat(pick_string, "Iron");
+    mvprintw(3, 10, pick_string); 
+  } 
 
   /* weapon */
   char * weap_string = (char*) malloc(9);
@@ -284,10 +311,38 @@ void HUD(Player * user){
     case IRON_SWORD:
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 13));
       strcat(weap_string, "Iron Sword"); 
-      mvprintw(3, 30, weap_string);
+      mvprintw(3, 29, weap_string);
     default:
-      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 11)); 
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12)); 
       strcat(weap_string, "No weapon");
-      mvprintw(3, 27, weap_string); 
+      mvprintw(3, 29, weap_string); 
+  }
+  
+  free(iron_string);
+  free(silver_string);
+  free(num);
+  free(pick_string);
+  free(weap_string);
+}
+
+void crafting(Player * user){
+  if(user->inventory[IRON_SLOT] >= 3){
+    mvprintw(5, 0, "Craft iron pickaxe? y/n");
+    int ch = getch();
+    if(ch == 'y'){
+      user->inventory[IRON_SLOT] -= 3;
+      user->inventory[PICK_SLOT] = IRON_PICK;
+      HUD(user);
+      // mvprintw(5, 0, "crafted");	
+    }
+    clear_text(5, 0, 24); // clear question 
+  }
+}
+
+void clear_text(int y, int x, int end_x){
+  int i = x;
+  for(i; i < end_x; i++){
+    if(mvinch(y, i))
+      mvprintw(y, i, " ");
   }
 }

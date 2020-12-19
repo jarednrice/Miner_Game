@@ -5,5 +5,6 @@
 #define SILVER_SLOT 3
 
 /* specific item values */
-#define IRON_PICK 1
+#define COP_PICK 1
+#define IRON_PICK 2
 #define IRON_SWORD 1
