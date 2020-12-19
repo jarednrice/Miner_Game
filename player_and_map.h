@@ -43,6 +43,7 @@ typedef struct Player{
 } Player;
 
 Level * mapSetUp();
+void cave_gen(Level * level);
 Player * playerSetup(Level * level);
 Shop shopSetup(Level * level);
 int handleInput(int input, Player * user);
@@ -52,3 +53,4 @@ bool mining(Player * user, char ore);
 void HUD(Player * user);
 void crafting(Player * user);
 void clear_text(int y, int x, int end_x);
+int random_pos(int min, int max);

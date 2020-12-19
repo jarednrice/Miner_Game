@@ -71,9 +71,24 @@ Level * mapSetUp(){
       }
     }
   }
-  // attroff(COLOR_PAIR(EARTH_PAIR));
+
+  /* generate the tunnels and caves */
+  cave_gen(newLevel);
 
   return newLevel;
+}
+
+void cave_gen(Level * level){
+  /* get random point */
+  int rand_x = random_pos(0, level->window.width - 2); 
+  int rand_y = random_pos(level->surface + 2, level->window.height - 1); 
+  attron(COLOR_PAIR(TRAIL_PAIR));
+  mvprintw(rand_y, rand_x, ".");
+  attroff(COLOR_PAIR(TRAIL_PAIR));
+}
+
+int random_pos(int min, int max){
+  return min + rand() / (RAND_MAX / (max - min + 1) + 1);
 }
 
 Shop shopSetup(Level * level){
