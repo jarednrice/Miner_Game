@@ -80,15 +80,83 @@ Level * mapSetUp(){
 
 void cave_gen(Level * level){
   /* get random point */
-  int rand_x = random_pos(0, level->window.width - 2); 
-  int rand_y = random_pos(level->surface + 2, level->window.height - 1); 
+  Position rand;
+  rand.x = random_pos(0, level->window.width - 2); 
+  rand.y = random_pos(level->surface + 2, level->window.height - 1);
+  /* drop point */
   attron(COLOR_PAIR(TRAIL_PAIR));
-  mvprintw(rand_y, rand_x, ".");
+  mvprintw(rand.y, rand.x, ".");
   attroff(COLOR_PAIR(TRAIL_PAIR));
+
+  /* loop until path tile count is reached */
+  int path_count = 1;
+  int total = (((level->window.height - level->surface) * level->window.width - 1) - 1) / 5;  
+  while(path_count <= total){
+    /* get point in random dir from from */
+    rand = random_dir(rand, level);
+    
+    /* check if block isn't wall */
+    int testch = mvinch(rand.y, rand.x);
+    if((testch & A_CHARTEXT) == '.')
+      continue; 
+   
+    /* drop point and increment */ 
+    attron(COLOR_PAIR(TRAIL_PAIR));
+    mvprintw(rand.y, rand.x, ".");
+    attroff(COLOR_PAIR(TRAIL_PAIR));
+    path_count += 1;
+  }
 }
 
 int random_pos(int min, int max){
   return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
+Position random_dir(Position pos, Level * level){
+  Position new_pos;
+
+  /* four possibilities */
+  /* NSEW */
+  int rand_dir = rand() % 4;
+  // printf("%d", rand_dir);
+
+  int new_y;
+  int new_x;
+  /* each num assigned to dir */
+  switch(rand_dir){
+    case 0: // north
+      new_y = pos.y - 1;
+      new_x = pos.x;
+      break;
+    case 1: // south
+      new_y = pos.y + 1;
+      new_x = pos.x;
+      break;
+    case 2: // east
+      new_x = pos.x + 1;
+      new_y = pos.y;
+      break;
+    case 3: // west
+      new_x = pos.x - 1;
+      new_y = pos.y;
+      break;
+  }
+
+  /* check borders */ 
+  if(new_x <= 0)
+    new_x++;
+  else if(new_x >= level->window.width - 1)
+    new_x--; 
+
+  if(new_y >= level->window.height - 1)
+    new_y--;
+  else if(new_y <= level-> surface + 1)
+    new_y++;
+
+  new_pos.x = new_x;
+  new_pos.y = new_y;
+
+  return new_pos;
 }
 
 Shop shopSetup(Level * level){
