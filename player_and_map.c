@@ -324,6 +324,7 @@ bool mining(Player * user, char ore){
     int i = user->inventory[IRON_SLOT];
     user->inventory[IRON_SLOT] = ++i;
     HUD(user);
+    clear_text(1, 0, 30);
     mvprintw(1, 0, "Got iron ore!");
     return true;
   }
@@ -331,6 +332,7 @@ bool mining(Player * user, char ore){
     int i = user->inventory[SILVER_SLOT];
     user->inventory[SILVER_SLOT] = ++i;
     HUD(user);
+    clear_text(1, 0, 30);
     mvprintw(1, 0, "Got silver ore!");
     return true;
   }
@@ -371,18 +373,26 @@ void HUD(Player * user){
   strcpy(pick_string, "Pick axe: ");
   
   int pick = user->inventory[PICK_SLOT];
-  /* would do as a switch but it causes an issue with displaying the strings */
-  if(pick == COP_PICK){
-    pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
-    strcat(pick_string, "Copper");
-    mvprintw(3, 10, pick_string); 
-  }
-  else if(pick == IRON_PICK){
-    /* clear extra chars */
-    clear_text(3, 10, 30);
-    pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
-    strcat(pick_string, "Iron");
-    mvprintw(3, 10, pick_string); 
+  switch(pick){
+    case COP_PICK:
+      pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
+      strcat(pick_string, "Copper");
+      mvprintw(3, 10, pick_string);
+      break; 
+    case IRON_PICK:
+      /* clear extra chars */
+      clear_text(3, 10, 30);
+      pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
+      strcat(pick_string, "Iron");
+      mvprintw(3, 10, pick_string);
+      break; 
+    case SILVER_PICK:
+      /* clear extra chars */
+      clear_text(3, 10, 30);
+      pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
+      strcat(pick_string, "Silver");
+      mvprintw(3, 10, pick_string);
+      break; 
   } 
 
   /* weapon */
@@ -392,9 +402,16 @@ void HUD(Player * user){
   int weapon = user->inventory[WEAPON_SLOT];
   switch(weapon){
     case IRON_SWORD:
-      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 13));
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12));
       strcat(weap_string, "Iron Sword"); 
       mvprintw(3, 29, weap_string);
+      break;
+    case SILVER_SWORD:
+      clear_text(3, 29, 100);
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 14));
+      strcat(weap_string, "Silver Sword"); 
+      mvprintw(3, 29, weap_string);
+      break;
     default:
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12)); 
       strcat(weap_string, "No weapon");
@@ -409,17 +426,61 @@ void HUD(Player * user){
 }
 
 void crafting(Player * user){
-  if(user->inventory[IRON_SLOT] >= 3){
-    mvprintw(5, 0, "Craft iron pickaxe? y/n");
-    int ch = getch();
-    if(ch == 'y'){
-      user->inventory[IRON_SLOT] -= 3;
-      user->inventory[PICK_SLOT] = IRON_PICK;
-      HUD(user);
-      // mvprintw(5, 0, "crafted");	
-    }
-    clear_text(5, 0, 24); // clear question 
-  }
+   mvprintw(5, 0, "Craft iron pickaxe (1)");
+   mvprintw(5, 25, "Craft iron sword (2)"); 
+   mvprintw(6, 0, "Craft silver pickaxe (3)"); 
+   mvprintw(6, 27, "Craft silver sword (4)");
+   
+   int ch = getch();
+   switch(ch){
+     case '1':
+       if(user->inventory[IRON_SLOT] >= 3){
+         user->inventory[IRON_SLOT] -= 3;
+         user->inventory[PICK_SLOT] = IRON_PICK;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more iron!");
+       }
+       break;
+     case '2':
+       if(user->inventory[IRON_SLOT] >= 3){
+         user->inventory[IRON_SLOT] -= 3;
+         user->inventory[WEAPON_SLOT] = IRON_SWORD;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more iron!");
+       }
+       break;
+     case '3':
+       if(user->inventory[SILVER_SLOT] >= 3){
+         user->inventory[SILVER_SLOT] -= 3;
+         user->inventory[PICK_SLOT] = SILVER_PICK;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more silver!");
+       }
+       break;
+     case '4': 
+       if(user->inventory[SILVER_SLOT] >= 3){
+         user->inventory[SILVER_SLOT] -= 3;
+         user->inventory[WEAPON_SLOT] = SILVER_SWORD;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more silver!");
+       }
+       break;
+   } 
+   
+   clear_text(5, 0, 60);
+   clear_text(6, 0, 60);
 }
 
 void clear_text(int y, int x, int end_x){
