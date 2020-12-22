@@ -109,9 +109,10 @@ void cave_gen(Level * level){
       attroff(COLOR_PAIR(TREASURE_PAIR));
     }
     else if(t == 2){
-      attron(COLOR_PAIR(ENEMY_PAIR));
+      /*attron(COLOR_PAIR(ENEMY_PAIR));
       mvprintw(random.y, random.x, "&");
-      attroff(COLOR_PAIR(ENEMY_PAIR)); 
+      attroff(COLOR_PAIR(ENEMY_PAIR));*/
+      goblin_spawn(random); 
     }
     else {   
       attron(COLOR_PAIR(TRAIL_PAIR));
@@ -368,8 +369,10 @@ void HUD(Player * user){
   char * num = (char*) malloc (length + 1);
   snprintf(num, length + 1, "%d",  user->inventory[IRON_SLOT]);
   
-  iron_string = (char*) realloc(iron_string, (strlen(iron_string) + strlen(num) + 2));
-  strcat(iron_string, num); 
+  int final_length = strlen(iron_string) + strlen(num);
+  iron_string = (char*) realloc(iron_string, final_length + 2);
+  strcat(iron_string, num);
+  clear_text(3, 0, final_length + 1); 
   mvprintw(3, 0, iron_string);
 
   /* silver */
@@ -379,8 +382,10 @@ void HUD(Player * user){
   length = snprintf(NULL, 0, "%d",  user->inventory[SILVER_SLOT]);  
   snprintf(num, length + 1, "%d",  user->inventory[SILVER_SLOT]);
   
-  silver_string = (char*) realloc(silver_string, (strlen(silver_string) + strlen(num) + 2));
+  final_length = strlen(silver_string) + strlen(num);
+  silver_string = (char*) realloc(silver_string, final_length + 2);
   strcat(silver_string, num); 
+  clear_text(4, 0, final_length + 1); 
   mvprintw(4, 0, silver_string);
 
   /* pickaxe */
@@ -505,4 +510,23 @@ void clear_text(int y, int x, int end_x){
     if(mvinch(y, i))
       mvprintw(y, i, " ");
   }
+}
+
+/* HANDLE ENEMIES */
+
+/* need to make like an array of enemies or something */
+
+void goblin_spawn(Position pos){
+  Goblin * new_goblin;
+  new_goblin = malloc(sizeof(Goblin));
+
+  new_goblin->health = 10;
+  new_goblin->money = 5;
+
+  new_goblin->position.x = pos.x;
+  new_goblin->position.y = pos.y;
+  
+  attron(COLOR_PAIR(ENEMY_PAIR));
+  mvprintw(pos.y, pos.x, "&");
+  attroff(COLOR_PAIR(ENEMY_PAIR)); 
 }

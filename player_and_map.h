@@ -1,18 +1,8 @@
 #include "common.h"
 #include "graphics.h"
 #include "inventory.h"
+#include "position_and_window.h"
 #include <string.h>
-
-typedef struct Window {
-  int width;
-  int height;
-} Window;
-
-typedef struct Position {
-  int x;
-  int y;
-  // TILE_TYPE tile;
-} Position;
 
 typedef struct Shop{
   Position position_start;
@@ -42,6 +32,12 @@ typedef struct Player{
   // Room * room;
 } Player;
 
+typedef struct Goblin{
+  Position position;
+  int health;
+  int money;
+} Goblin;
+
 Level * mapSetUp();
 void cave_gen(Level * level);
 Player * playerSetup(Level * level);
@@ -50,8 +46,10 @@ int handleInput(int input, Player * user);
 int checkPos(Position newPos, Player * user);
 int playerMove(Position newPos, Player * user);
 bool mining(Player * user, char ore);
-// void HUD(Player * user);
+void HUD(Player * user);
 void crafting(Player * user);
 void clear_text(int y, int x, int end_x);
 int random_pos(int min, int max);
 Position random_dir(Position pos, Level * level);
+
+void goblin_spawn(Position pos);
