@@ -80,12 +80,12 @@ Level * mapSetUp(){
 
 void cave_gen(Level * level){
   /* get random point */
-  Position rand;
-  rand.x = random_pos(0, level->window.width - 2); 
-  rand.y = random_pos(level->surface + 2, level->window.height - 1);
+  Position random;
+  random.x = random_pos(0, level->window.width - 2); 
+  random.y = random_pos(level->surface + 2, level->window.height - 1);
   /* drop point */
   attron(COLOR_PAIR(TRAIL_PAIR));
-  mvprintw(rand.y, rand.x, ".");
+  mvprintw(random.y, random.x, ".");
   attroff(COLOR_PAIR(TRAIL_PAIR));
 
   /* loop until path tile count is reached */
@@ -93,17 +93,31 @@ void cave_gen(Level * level){
   int total = (((level->window.height - level->surface) * level->window.width - 1) - 1) / 5;  
   while(path_count <= total){
     /* get point in random dir from from */
-    rand = random_dir(rand, level);
+    random = random_dir(random, level);
     
     /* check if block isn't wall */
-    int testch = mvinch(rand.y, rand.x);
+    int testch = mvinch(random.y, random.x);
     if((testch & A_CHARTEXT) == '.')
       continue; 
    
-    /* drop point and increment */ 
-    attron(COLOR_PAIR(TRAIL_PAIR));
-    mvprintw(rand.y, rand.x, ".");
-    attroff(COLOR_PAIR(TRAIL_PAIR));
+    /* drop point and increment */
+    /* random chance that point is treasure */
+    int t = rand() % 100;
+    if(t == 1){
+      attron(COLOR_PAIR(TREASURE_PAIR));
+      mvprintw(random.y, random.x, "T");
+      attroff(COLOR_PAIR(TREASURE_PAIR));
+    }
+    else if(t == 2){
+      attron(COLOR_PAIR(ENEMY_PAIR));
+      mvprintw(random.y, random.x, "&");
+      attroff(COLOR_PAIR(ENEMY_PAIR)); 
+    }
+    else {   
+      attron(COLOR_PAIR(TRAIL_PAIR));
+      mvprintw(random.y, random.x, ".");
+      attroff(COLOR_PAIR(TRAIL_PAIR));
+    }
     path_count += 1;
   }
 }
@@ -190,11 +204,11 @@ Player * playerSetup(Level * level){
   newPlayer = malloc(sizeof(Player));
 
   /* initialize window info and player position */
-  /* spawn is half point on calculated width */
+  /* spawn is 3/4 point on calculated width */
   /* surface location is window.height/4 + 1 */
   newPlayer->window.width = level->window.width;
   newPlayer->window.height = level->window.height;
-  newPlayer->position.x = newPlayer->window.width/2;
+  newPlayer->position.x = newPlayer->window.width * 0.75;
   newPlayer->position.y = newPlayer->window.height/4 + 1;
 
   /* initialize building info that player must "know" */
@@ -205,8 +219,9 @@ Player * playerSetup(Level * level){
   newPlayer->money = 0;
   newPlayer->inventory[PICK_SLOT] = COP_PICK;  // start with copper pick axe
   newPlayer->inventory[WEAPON_SLOT] = 0;  // weapon
+  newPlayer->inventory[KEY_SLOT] = 0;
   newPlayer->inventory[IRON_SLOT] = 0;  // ore starting with iron
-  newPlayer->inventory[SILVER_SLOT] = 0;  // why does this break the floor tiles???
+  newPlayer->inventory[SILVER_SLOT] = 0;  
 
   playerMove(newPlayer->position, newPlayer);
 
@@ -402,6 +417,7 @@ void HUD(Player * user){
   int weapon = user->inventory[WEAPON_SLOT];
   switch(weapon){
     case IRON_SWORD:
+      clear_text(3, 29, 100);
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12));
       strcat(weap_string, "Iron Sword"); 
       mvprintw(3, 29, weap_string);

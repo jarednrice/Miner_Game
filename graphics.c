@@ -21,5 +21,7 @@ int colorSetUp() {
   init_pair(ELEVATOR_PAIR, COLOR_WHITE, COLOR_CYAN);
   init_pair(TRAIL_PAIR, COLOR_WHITE, COLOR_BLACK);
   init_pair(SHOP_PAIR, COLOR_WHITE, COLOR_RED);
+  init_pair(TREASURE_PAIR, COLOR_WHITE, COLOR_MAGENTA);
+  init_pair(ENEMY_PAIR, COLOR_WHITE, COLOR_RED);
   // clear();
 }
