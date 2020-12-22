@@ -1,5 +1,7 @@
 #include "player_and_map.h"
 
+/* SET UP MAP AND PLAYER */
+
 Level * mapSetUp(){
   Level * newLevel;
   newLevel = malloc(sizeof(Level));
@@ -229,6 +231,8 @@ Player * playerSetup(Level * level){
   return newPlayer;
 }
 
+/* HANDLE MOVEMENT */
+
 int handleInput(int input, Player * user){
   Position newPos;
 
@@ -331,6 +335,8 @@ int playerMove(Position newPos, Player * user){
   move(user->position.y, user->position.x);
 }
 
+/* MINING AND CRAFTING */
+
 bool mining(Player * user, char ore){
   int j = user->inventory[PICK_SLOT]; // what type of pick axe does the player have?
   /* clear extra chars for display message */
@@ -355,6 +361,93 @@ bool mining(Player * user, char ore){
   else
     return false;
 }
+
+void crafting(Player * user){
+   mvprintw(5, 0, "Craft iron pickaxe (1)");
+   mvprintw(5, 25, "Craft iron sword (2)"); 
+   mvprintw(6, 0, "Craft silver pickaxe (3)"); 
+   mvprintw(6, 27, "Craft silver sword (4)");
+   
+   int ch = getch();
+   switch(ch){
+     case '1':
+       if(user->inventory[IRON_SLOT] >= 3){
+         user->inventory[IRON_SLOT] -= 3;
+         user->inventory[PICK_SLOT] = IRON_PICK;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more iron!");
+       }
+       break;
+     case '2':
+       if(user->inventory[IRON_SLOT] >= 3){
+         user->inventory[IRON_SLOT] -= 3;
+         user->inventory[WEAPON_SLOT] = IRON_SWORD;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more iron!");
+       }
+       break;
+     case '3':
+       if(user->inventory[SILVER_SLOT] >= 3){
+         user->inventory[SILVER_SLOT] -= 3;
+         user->inventory[PICK_SLOT] = SILVER_PICK;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more silver!");
+       }
+       break;
+     case '4': 
+       if(user->inventory[SILVER_SLOT] >= 3){
+         user->inventory[SILVER_SLOT] -= 3;
+         user->inventory[WEAPON_SLOT] = SILVER_SWORD;
+         HUD(user);
+       }
+       else {
+	 clear_text(1, 0, 30);
+         mvprintw(1, 0, "Need more silver!");
+       }
+       break;
+   } 
+   
+   clear_text(5, 0, 60);
+   clear_text(6, 0, 60);
+}
+
+void clear_text(int y, int x, int end_x){
+  int i = x;
+  for(i; i < end_x; i++){
+    if(mvinch(y, i))
+      mvprintw(y, i, " ");
+  }
+}
+
+/* HANDLE ENEMIES */
+
+/* need to make like an array of enemies or something */
+
+void goblin_spawn(Position pos){
+  Goblin * new_goblin;
+  new_goblin = malloc(sizeof(Goblin));
+
+  new_goblin->health = 10;
+  new_goblin->money = 5;
+
+  new_goblin->position.x = pos.x;
+  new_goblin->position.y = pos.y;
+  
+  attron(COLOR_PAIR(ENEMY_PAIR));
+  mvprintw(pos.y, pos.x, "&");
+  attroff(COLOR_PAIR(ENEMY_PAIR)); 
+}
+
+/* HANDLE HUD */
 
 void HUD(Player * user){
   /* ores */
@@ -444,89 +537,4 @@ void HUD(Player * user){
   free(num);
   free(pick_string);
   free(weap_string);
-}
-
-void crafting(Player * user){
-   mvprintw(5, 0, "Craft iron pickaxe (1)");
-   mvprintw(5, 25, "Craft iron sword (2)"); 
-   mvprintw(6, 0, "Craft silver pickaxe (3)"); 
-   mvprintw(6, 27, "Craft silver sword (4)");
-   
-   int ch = getch();
-   switch(ch){
-     case '1':
-       if(user->inventory[IRON_SLOT] >= 3){
-         user->inventory[IRON_SLOT] -= 3;
-         user->inventory[PICK_SLOT] = IRON_PICK;
-         HUD(user);
-       }
-       else {
-	 clear_text(1, 0, 30);
-         mvprintw(1, 0, "Need more iron!");
-       }
-       break;
-     case '2':
-       if(user->inventory[IRON_SLOT] >= 3){
-         user->inventory[IRON_SLOT] -= 3;
-         user->inventory[WEAPON_SLOT] = IRON_SWORD;
-         HUD(user);
-       }
-       else {
-	 clear_text(1, 0, 30);
-         mvprintw(1, 0, "Need more iron!");
-       }
-       break;
-     case '3':
-       if(user->inventory[SILVER_SLOT] >= 3){
-         user->inventory[SILVER_SLOT] -= 3;
-         user->inventory[PICK_SLOT] = SILVER_PICK;
-         HUD(user);
-       }
-       else {
-	 clear_text(1, 0, 30);
-         mvprintw(1, 0, "Need more silver!");
-       }
-       break;
-     case '4': 
-       if(user->inventory[SILVER_SLOT] >= 3){
-         user->inventory[SILVER_SLOT] -= 3;
-         user->inventory[WEAPON_SLOT] = SILVER_SWORD;
-         HUD(user);
-       }
-       else {
-	 clear_text(1, 0, 30);
-         mvprintw(1, 0, "Need more silver!");
-       }
-       break;
-   } 
-   
-   clear_text(5, 0, 60);
-   clear_text(6, 0, 60);
-}
-
-void clear_text(int y, int x, int end_x){
-  int i = x;
-  for(i; i < end_x; i++){
-    if(mvinch(y, i))
-      mvprintw(y, i, " ");
-  }
-}
-
-/* HANDLE ENEMIES */
-
-/* need to make like an array of enemies or something */
-
-void goblin_spawn(Position pos){
-  Goblin * new_goblin;
-  new_goblin = malloc(sizeof(Goblin));
-
-  new_goblin->health = 10;
-  new_goblin->money = 5;
-
-  new_goblin->position.x = pos.x;
-  new_goblin->position.y = pos.y;
-  
-  attron(COLOR_PAIR(ENEMY_PAIR));
-  mvprintw(pos.y, pos.x, "&");
-  attroff(COLOR_PAIR(ENEMY_PAIR)); 
 }
