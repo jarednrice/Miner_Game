@@ -1,5 +1,10 @@
 #include "player_and_map.h"
 
+/* GLOBAL VARIABLES */
+
+Goblin * goblin_list;
+int gob_length;
+
 /* SET UP MAP AND PLAYER */
 
 Level * mapSetUp(){
@@ -99,7 +104,9 @@ void cave_gen(Level * level){
     
     /* check if block isn't wall */
     int testch = mvinch(random.y, random.x);
-    if((testch & A_CHARTEXT) == '.')
+    if((testch & A_CHARTEXT) == '.' ||
+    (testch & A_CHARTEXT) == 'T'||
+    (testch & A_CHARTEXT) == '&')
       continue; 
    
     /* drop point and increment */
@@ -111,10 +118,8 @@ void cave_gen(Level * level){
       attroff(COLOR_PAIR(TREASURE_PAIR));
     }
     else if(t == 2){
-      /*attron(COLOR_PAIR(ENEMY_PAIR));
-      mvprintw(random.y, random.x, "&");
-      attroff(COLOR_PAIR(ENEMY_PAIR));*/
-      goblin_spawn(random); 
+      goblin_spawn(random);
+      // printf("( %d %d )", random.x, random.y); 
     }
     else {   
       attron(COLOR_PAIR(TRAIL_PAIR));
@@ -431,8 +436,19 @@ void clear_text(int y, int x, int end_x){
 /* HANDLE ENEMIES */
 
 /* need to make like an array of enemies or something */
+/* have a function that returns that array to main */
 
-void goblin_spawn(Position pos){
+void prep_enemies(){
+  // initialize the global enemy arrays
+  gob_length = 0;
+  goblin_list = malloc(sizeof(Goblin));
+}
+
+Goblin * goblin_spawn(Position pos){
+  /* need to add these to global array */
+  ++gob_length;
+  goblin_list = realloc(goblin_list, gob_length * sizeof(Goblin));
+
   Goblin * new_goblin;
   new_goblin = malloc(sizeof(Goblin));
 
@@ -445,6 +461,14 @@ void goblin_spawn(Position pos){
   attron(COLOR_PAIR(ENEMY_PAIR));
   mvprintw(pos.y, pos.x, "&");
   attroff(COLOR_PAIR(ENEMY_PAIR)); 
+
+  goblin_list[gob_length - 1] = *new_goblin; 
+  
+  return new_goblin;
+}
+
+Goblin * get_goblins(){
+  return goblin_list;
 }
 
 /* HANDLE HUD */

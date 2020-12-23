@@ -52,4 +52,6 @@ void clear_text(int y, int x, int end_x);
 int random_pos(int min, int max);
 Position random_dir(Position pos, Level * level);
 
-void goblin_spawn(Position pos);
+void prep_enemies();
+Goblin * goblin_spawn(Position pos);
+Goblin * get_goblins();
