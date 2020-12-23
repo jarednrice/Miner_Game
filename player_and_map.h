@@ -55,3 +55,4 @@ Position random_dir(Position pos, Level * level);
 void prep_enemies();
 Goblin * goblin_spawn(Position pos);
 Goblin * get_goblins();
+void gob_move(Goblin * gobs, Level * level);

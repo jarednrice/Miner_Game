@@ -29,6 +29,7 @@ int main(){
   while((ch = getch()) != 'q'){
     HUD(user);
     handleInput(ch, user);
+    gob_move(goblins, level);
   }
   endwin();
   

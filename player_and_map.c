@@ -471,6 +471,28 @@ Goblin * get_goblins(){
   return goblin_list;
 }
 
+void gob_move(Goblin * gobs, Level * level){
+  /* need to actually change the goblins pos */
+  Position pos;
+  Position old_pos;
+  int i = 0;
+  for(i; i < gob_length; i++){
+    pos = goblin_list[i].position;
+    old_pos = pos; 
+    pos = random_dir(pos, level);
+   
+    goblin_list[i].position = pos; 
+
+    attron(COLOR_PAIR(TRAIL_PAIR));
+    mvprintw(old_pos.y, old_pos.x, ".");
+    attroff(COLOR_PAIR(TRAIL_PAIR)); 
+  
+    attron(COLOR_PAIR(ENEMY_PAIR));
+    mvprintw(pos.y, pos.x, "&");
+    attroff(COLOR_PAIR(ENEMY_PAIR)); 
+  } 
+}
+
 /* HANDLE HUD */
 
 void HUD(Player * user){
