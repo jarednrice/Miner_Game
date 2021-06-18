@@ -3,6 +3,7 @@
 /* GLOBAL VARIABLES */
 
 Goblin * head_gob; // head of goblin linked list to be returned
+bool combat_flag = false; // used to freeze movement input during combat;
 
 /* SET UP MAP AND PLAYER */
 
@@ -240,27 +241,33 @@ Player * playerSetup(Level * level){
 int handleInput(int input, Player * user){
   Position newPos;
 
-  switch (input) {
-    case 'w':
-      newPos.y = user->position.y - 1;
-      newPos.x = user->position.x;
-      break;
-    case 'a':
-      newPos.y = user->position.y;
-      newPos.x = user->position.x - 1;
-      break;
-    case 's':
-      newPos.y = user->position.y + 1;
-      newPos.x = user->position.x;
-      break;
-    case 'd':
-      newPos.y = user->position.y;
-      newPos.x = user->position.x + 1;
-      break;
-    default: break;
+  if(!combat_flag){
+    switch (input) {
+      case 'w':
+        newPos.y = user->position.y - 1;
+        newPos.x = user->position.x;
+        break;
+      case 'a':
+        newPos.y = user->position.y;
+        newPos.x = user->position.x - 1;
+        break;
+      case 's':
+        newPos.y = user->position.y + 1;
+        newPos.x = user->position.x;
+        break;
+      case 'd':
+        newPos.y = user->position.y;
+        newPos.x = user->position.x + 1;
+        break;
+      default: break;
+    }
+    checkPos(newPos, user);
   }
-
-  checkPos(newPos, user);
+  else{
+    /* it's always gonna be good so we can bypass the check */
+    move(user->position.y, user->position.x);
+    printf("%s\n", "gay");
+  }
 }
 
 int checkPos(Position newPos, Player * user){
@@ -488,7 +495,7 @@ Goblin * get_goblins(){
   return head_gob;
 }
 
-void gob_move(Goblin * gobs, Level * level){
+void gob_move(Goblin * gobs, Level * level, Player * user){
 
   Position pos;
   Position old_pos;
@@ -508,11 +515,78 @@ void gob_move(Goblin * gobs, Level * level){
     mvprintw(pos.y, pos.x, "&");
     attroff(COLOR_PAIR(ENEMY_PAIR));
 
+    /* initiate combat */
+    if((current->position.x == user->position.x) && (current->position.y == user->position.y))
+      combat(current, user);
+
     current = current->next;
   }
 }
 
+void combat(Goblin * gob, Player * user){
+  combat_flag = true;
+
+  /* clear extra chars for display message */
+  clear_text(1, 0, 30);
+
+  mvprintw(1, 0, "A goblin approaches!");
+
+  int weapon = user->inventory[WEAPON_SLOT];
+
+  /* use timers to emulate turns */
+
+  while(gob->health > 0){
+    switch (weapon) {
+      case IRON_SWORD:
+        gob->health -= 3;
+        break;
+      case SILVER_SWORD:
+        gob->health -= 5;
+        break;
+      default:
+        gob->health -= 1;
+        break;
+    }
+  }
+
+  combat_flag = false;
+
+  kill_gob(gob);
+
+  // printf("%s\n", "done");
+}
+
+void kill_gob(Goblin * gob){
+  Goblin * temp = head_gob;
+  Goblin * prev;
+
+  /* if head gob is being killed */
+  if(temp != NULL && temp == gob){
+    head_gob = temp->next;
+    free(temp);
+    return;
+  }
+
+  /* search for gob to be killed */
+  while(temp != NULL && temp != gob){
+    prev = temp;
+    temp = temp->next;
+  }
+
+  /* if gob isn't there for some reason */
+  if(temp == NULL)
+    return;
+
+  /* kill goblin */
+  prev->next = temp->next;
+
+  free(temp);
+}
+
 /* HANDLE HUD */
+
+/* doesn't handle scenarios like mining or combat;
+   those have their own functions */
 
 void HUD(Player * user){
   /* ores */
