@@ -36,6 +36,8 @@ typedef struct Goblin{
   Position position;
   int health;
   int money;
+  bool first_flag;
+  struct Goblin * next;
 } Goblin;
 
 Level * mapSetUp();
@@ -53,6 +55,6 @@ int random_pos(int min, int max);
 Position random_dir(Position pos, Level * level);
 
 void prep_enemies();
-Goblin * goblin_spawn(Position pos);
+Goblin * goblin_spawn(Position pos, Goblin * head);
 Goblin * get_goblins();
 void gob_move(Goblin * gobs, Level * level);

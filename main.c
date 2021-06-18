@@ -22,7 +22,7 @@ int main(){
   /* printf("Height %d", level->window.height);
   printf("Width %d", level->window.width); */
 
-  /* get enemy info */ 
+  /* get enemy info */
   goblins = get_goblins();
 
   /* main game loop */
@@ -32,8 +32,8 @@ int main(){
     gob_move(goblins, level);
   }
   endwin();
-  
-  free(goblins);
+
+  // free(goblins);
   free(user);
   free(level);
   return 0;

@@ -2,8 +2,7 @@
 
 /* GLOBAL VARIABLES */
 
-Goblin * goblin_list;
-int gob_length;
+Goblin * head_gob; // head of goblin linked list to be returned
 
 /* SET UP MAP AND PLAYER */
 
@@ -86,9 +85,10 @@ Level * mapSetUp(){
 }
 
 void cave_gen(Level * level){
+
   /* get random point */
   Position random;
-  random.x = random_pos(0, level->window.width - 2); 
+  random.x = random_pos(0, level->window.width - 2);
   random.y = random_pos(level->surface + 2, level->window.height - 1);
   /* drop point */
   attron(COLOR_PAIR(TRAIL_PAIR));
@@ -97,18 +97,18 @@ void cave_gen(Level * level){
 
   /* loop until path tile count is reached */
   int path_count = 1;
-  int total = (((level->window.height - level->surface) * level->window.width - 1) - 1) / 5;  
+  int total = (((level->window.height - level->surface) * level->window.width - 1) - 1) / 5;
   while(path_count <= total){
     /* get point in random dir from from */
     random = random_dir(random, level);
-    
+
     /* check if block isn't wall */
     int testch = mvinch(random.y, random.x);
     if((testch & A_CHARTEXT) == '.' ||
     (testch & A_CHARTEXT) == 'T'||
     (testch & A_CHARTEXT) == '&')
-      continue; 
-   
+      continue;
+
     /* drop point and increment */
     /* random chance that point is treasure */
     int t = rand() % 100;
@@ -118,10 +118,9 @@ void cave_gen(Level * level){
       attroff(COLOR_PAIR(TREASURE_PAIR));
     }
     else if(t == 2){
-      goblin_spawn(random);
-      // printf("( %d %d )", random.x, random.y); 
+      goblin_spawn(random, head_gob);
     }
-    else {   
+    else {
       attron(COLOR_PAIR(TRAIL_PAIR));
       mvprintw(random.y, random.x, ".");
       attroff(COLOR_PAIR(TRAIL_PAIR));
@@ -164,11 +163,11 @@ Position random_dir(Position pos, Level * level){
       break;
   }
 
-  /* check borders */ 
+  /* check borders */
   if(new_x <= 0)
     new_x++;
   else if(new_x >= level->window.width - 1)
-    new_x--; 
+    new_x--;
 
   if(new_y >= level->window.height - 1)
     new_y--;
@@ -229,7 +228,7 @@ Player * playerSetup(Level * level){
   newPlayer->inventory[WEAPON_SLOT] = 0;  // weapon
   newPlayer->inventory[KEY_SLOT] = 0;
   newPlayer->inventory[IRON_SLOT] = 0;  // ore starting with iron
-  newPlayer->inventory[SILVER_SLOT] = 0;  
+  newPlayer->inventory[SILVER_SLOT] = 0;
 
   playerMove(newPlayer->position, newPlayer);
 
@@ -305,6 +304,7 @@ int playerMove(Position newPos, Player * user){
   oldPos.x = user->position.x;
 
   /* Dont' want all blocks to be replaced by '.' */
+  /* shop start position gets lost ? */
   if(oldPos.y == user->window.height/4 + 1){
     if((oldPos.x > user->shop.position_start.x - 1) &&
       (oldPos.x < user->shop.position_end.x + 1)){
@@ -346,7 +346,7 @@ bool mining(Player * user, char ore){
   int j = user->inventory[PICK_SLOT]; // what type of pick axe does the player have?
   /* clear extra chars for display message */
   clear_text(1, 0, 15);
-  
+
   if(ore == IRON && j >= COP_PICK){
     int i = user->inventory[IRON_SLOT];
     user->inventory[IRON_SLOT] = ++i;
@@ -369,10 +369,10 @@ bool mining(Player * user, char ore){
 
 void crafting(Player * user){
    mvprintw(5, 0, "Craft iron pickaxe (1)");
-   mvprintw(5, 25, "Craft iron sword (2)"); 
-   mvprintw(6, 0, "Craft silver pickaxe (3)"); 
+   mvprintw(5, 25, "Craft iron sword (2)");
+   mvprintw(6, 0, "Craft silver pickaxe (3)");
    mvprintw(6, 27, "Craft silver sword (4)");
-   
+
    int ch = getch();
    switch(ch){
      case '1':
@@ -408,7 +408,7 @@ void crafting(Player * user){
          mvprintw(1, 0, "Need more silver!");
        }
        break;
-     case '4': 
+     case '4':
        if(user->inventory[SILVER_SLOT] >= 3){
          user->inventory[SILVER_SLOT] -= 3;
          user->inventory[WEAPON_SLOT] = SILVER_SWORD;
@@ -419,8 +419,8 @@ void crafting(Player * user){
          mvprintw(1, 0, "Need more silver!");
        }
        break;
-   } 
-   
+   }
+
    clear_text(5, 0, 60);
    clear_text(6, 0, 60);
 }
@@ -439,120 +439,139 @@ void clear_text(int y, int x, int end_x){
 /* have a function that returns that array to main */
 
 void prep_enemies(){
-  // initialize the global enemy arrays
-  gob_length = 0;
-  goblin_list = malloc(sizeof(Goblin));
+  /* initialize the global enemy arrays */
+
+  /* first initial enemies to be placed in cave */
+  /* each will be first in a linked list */
+  /* data will be filled out by a function */
+  /* if not done like this the first one will not be completely filled out */
+
+  head_gob = malloc(sizeof(Goblin)); // first goblin in linked list of goblins
+  head_gob->first_flag = true;
+  head_gob->next = NULL;
 }
 
-Goblin * goblin_spawn(Position pos){
-  /* need to add these to global array */
-  ++gob_length;
-  goblin_list = realloc(goblin_list, gob_length * sizeof(Goblin));
+Goblin * goblin_spawn(Position pos, Goblin * head){
 
-  Goblin * new_goblin;
-  new_goblin = malloc(sizeof(Goblin));
+  Goblin * current = head;
+  /* handle first goblin */
+  if(current->first_flag){
+    current->health = 10;
+    current->money = 5;
+    current->position.x = pos.x;
+    current->position.y = pos.y;
+    current->first_flag = false;
+  }
+  /* all the others */
+  else {
+    while(current->next != NULL){
+      current = current->next;
+    }
 
-  new_goblin->health = 10;
-  new_goblin->money = 5;
+    /* add new goblin to linked list */
+    current->next = (Goblin * )malloc(sizeof(Goblin));
+    current->next->health = 10;
+    current->next->money = 5;
+    current->next->position.x = pos.x;
+    current->next->position.y = pos.y;
+    current->next->next = NULL;
+  }
 
-  new_goblin->position.x = pos.x;
-  new_goblin->position.y = pos.y;
-  
   attron(COLOR_PAIR(ENEMY_PAIR));
   mvprintw(pos.y, pos.x, "&");
-  attroff(COLOR_PAIR(ENEMY_PAIR)); 
+  attroff(COLOR_PAIR(ENEMY_PAIR));
 
-  goblin_list[gob_length - 1] = *new_goblin; 
-  
-  return new_goblin;
+  // return new_goblin;
 }
 
 Goblin * get_goblins(){
-  return goblin_list;
+  return head_gob;
 }
 
 void gob_move(Goblin * gobs, Level * level){
-  /* need to actually change the goblins pos */
+
   Position pos;
   Position old_pos;
-  int i = 0;
-  for(i; i < gob_length; i++){
-    pos = goblin_list[i].position;
-    old_pos = pos; 
+  Goblin * current = gobs;
+  while (current){
+    pos = current->position;
+    old_pos = pos;
     pos = random_dir(pos, level);
-   
-    goblin_list[i].position = pos; 
+
+    current->position = pos;
 
     attron(COLOR_PAIR(TRAIL_PAIR));
     mvprintw(old_pos.y, old_pos.x, ".");
-    attroff(COLOR_PAIR(TRAIL_PAIR)); 
-  
+    attroff(COLOR_PAIR(TRAIL_PAIR));
+
     attron(COLOR_PAIR(ENEMY_PAIR));
     mvprintw(pos.y, pos.x, "&");
-    attroff(COLOR_PAIR(ENEMY_PAIR)); 
-  } 
+    attroff(COLOR_PAIR(ENEMY_PAIR));
+
+    current = current->next;
+  }
 }
 
 /* HANDLE HUD */
 
 void HUD(Player * user){
   /* ores */
-  
+
   /* iron */
   /* allocate mem for strings */
   /* set init data */
-  char * iron_string = (char*) malloc(7); 
+  char * iron_string = (char*) malloc(7);
   strcpy(iron_string, "Iron: ");
 
-  int length = snprintf(NULL, 0, "%d",  user->inventory[IRON_SLOT]);  
+  int length = snprintf(NULL, 0, "%d",  user->inventory[IRON_SLOT]);
   char * num = (char*) malloc (length + 1);
   snprintf(num, length + 1, "%d",  user->inventory[IRON_SLOT]);
-  
+
   int final_length = strlen(iron_string) + strlen(num);
   iron_string = (char*) realloc(iron_string, final_length + 2);
   strcat(iron_string, num);
-  clear_text(3, 0, final_length + 1); 
+  clear_text(3, 0, final_length + 1);
   mvprintw(3, 0, iron_string);
 
   /* silver */
-  char * silver_string = (char*) malloc(9); 
+  char * silver_string = (char*) malloc(9);
   strcpy(silver_string, "Silver: ");
 
-  length = snprintf(NULL, 0, "%d",  user->inventory[SILVER_SLOT]);  
+  length = snprintf(NULL, 0, "%d",  user->inventory[SILVER_SLOT]);
   snprintf(num, length + 1, "%d",  user->inventory[SILVER_SLOT]);
-  
+
   final_length = strlen(silver_string) + strlen(num);
   silver_string = (char*) realloc(silver_string, final_length + 2);
-  strcat(silver_string, num); 
-  clear_text(4, 0, final_length + 1); 
+  strcat(silver_string, num);
+  clear_text(4, 0, final_length + 1);
   mvprintw(4, 0, silver_string);
 
   /* pickaxe */
   char * pick_string = (char*) malloc(11);
   strcpy(pick_string, "Pick axe: ");
-  
+
   int pick = user->inventory[PICK_SLOT];
   switch(pick){
     case COP_PICK:
       pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
       strcat(pick_string, "Copper");
       mvprintw(3, 10, pick_string);
-      break; 
+      break;
     case IRON_PICK:
       /* clear extra chars */
       clear_text(3, 10, 30);
       pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 6));
       strcat(pick_string, "Iron");
       mvprintw(3, 10, pick_string);
-      break; 
+      break;
     case SILVER_PICK:
       /* clear extra chars */
       clear_text(3, 10, 30);
       pick_string = (char*) realloc(pick_string, (strlen(pick_string) + 8));
       strcat(pick_string, "Silver");
       mvprintw(3, 10, pick_string);
-      break; 
-  } 
+      break;
+  }
 
   /* weapon */
   char * weap_string = (char*) malloc(9);
@@ -563,21 +582,21 @@ void HUD(Player * user){
     case IRON_SWORD:
       clear_text(3, 29, 100);
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12));
-      strcat(weap_string, "Iron Sword"); 
+      strcat(weap_string, "Iron Sword");
       mvprintw(3, 29, weap_string);
       break;
     case SILVER_SWORD:
       clear_text(3, 29, 100);
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 14));
-      strcat(weap_string, "Silver Sword"); 
+      strcat(weap_string, "Silver Sword");
       mvprintw(3, 29, weap_string);
       break;
     default:
-      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12)); 
+      weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12));
       strcat(weap_string, "No weapon");
-      mvprintw(3, 29, weap_string); 
+      mvprintw(3, 29, weap_string);
   }
-  
+
   free(iron_string);
   free(silver_string);
   free(num);
