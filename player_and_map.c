@@ -654,13 +654,13 @@ void HUD(Player * user){
   int weapon = user->inventory[WEAPON_SLOT];
   switch(weapon){
     case IRON_SWORD:
-      clear_text(3, 29, 100);
+      clear_text(3, 29, 50);
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 12));
       strcat(weap_string, "Iron Sword");
       mvprintw(3, 29, weap_string);
       break;
     case SILVER_SWORD:
-      clear_text(3, 29, 100);
+      clear_text(3, 29, 50);
       weap_string = (char*) realloc(weap_string, (strlen(weap_string) + 14));
       strcat(weap_string, "Silver Sword");
       mvprintw(3, 29, weap_string);
@@ -671,9 +671,32 @@ void HUD(Player * user){
       mvprintw(3, 29, weap_string);
   }
 
+  /* HEALTH INFO */
+
+  int hp_length = snprintf(NULL, 0, "%d", user->health); // find space needed for converting hp int to string
+  char * full_hp_string = (char*) malloc(hp_length + 4);
+  char * hp_string = (char*) malloc(hp_length + 1);
+  strcpy(full_hp_string, "HP: ");
+  sprintf(hp_string, "%d", user->health);
+  strcat(full_hp_string, hp_string);
+  mvprintw(3, 60, full_hp_string);
+
+  /* MONEY INFO */
+  int money_length = snprintf(NULL, 0, "%d", user->money); // find space needed for converting money int to string
+  char * full_money_string = (char*) malloc(money_length + 7);
+  char * money_string = (char*) malloc(money_length + 1);
+  strcpy(full_money_string, "MONEY: ");
+  sprintf(money_string, "%d", user->money);
+  strcat(full_money_string, money_string);
+  mvprintw(4, 60, full_money_string);
+
   free(iron_string);
   free(silver_string);
   free(num);
   free(pick_string);
   free(weap_string);
+  free(full_hp_string);
+  free(hp_string);
+  free(full_money_string);
+  free(money_string);
 }
