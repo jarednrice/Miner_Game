@@ -3,7 +3,7 @@
 /* GLOBAL VARIABLES */
 
 Goblin * head_gob; // head of goblin linked list to be returned
-bool combat_flag = false; // used to freeze movement input during combat;
+bool combat_flag = false; // used to freeze movement input during combat
 
 /* SET UP MAP AND PLAYER */
 
@@ -545,8 +545,11 @@ void combat(Goblin * gob, Player * user){
         break;
       default:
         gob->health -= 1;
+	// sleep(2);
+	gob->health -= 1;
         break;
     }
+    user->health -= 1;  
   }
 
   combat_flag = false;
@@ -581,6 +584,11 @@ void kill_gob(Goblin * gob){
   prev->next = temp->next;
 
   free(temp);
+}
+
+bool check_player_life(Player * user){
+  if(user->health == 0)
+    return false;
 }
 
 /* HANDLE HUD */
@@ -679,6 +687,7 @@ void HUD(Player * user){
   strcpy(full_hp_string, "HP: ");
   sprintf(hp_string, "%d", user->health);
   strcat(full_hp_string, hp_string);
+  clear_text(3, 60, 66);
   mvprintw(3, 60, full_hp_string);
 
   /* MONEY INFO */
