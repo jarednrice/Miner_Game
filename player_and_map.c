@@ -545,11 +545,9 @@ void combat(Goblin * gob, Player * user){
         break;
       default:
         gob->health -= 1;
-	// sleep(2);
-	gob->health -= 1;
         break;
     }
-    user->health -= 1;  
+    user->health -= 1;
   }
 
   combat_flag = false;
