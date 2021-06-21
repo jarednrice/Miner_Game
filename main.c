@@ -5,7 +5,6 @@
 
 int main(){
   Player * user;
-  Shop shop;
   Level * level;
   Goblin * goblins;
   int ch;
@@ -26,7 +25,7 @@ int main(){
   goblins = get_goblins();
 
   /* main game loop */
-  while((ch = getch()) != 'q', check_player_life(user)){
+  while((ch = getch()) != 'q' && check_player_life(user)){
     // check_player_life(user);
     HUD(user);
     handleInput(ch, user);

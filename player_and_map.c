@@ -238,7 +238,7 @@ Player * playerSetup(Level * level){
 
 /* HANDLE MOVEMENT */
 
-int handleInput(int input, Player * user){
+void handleInput(int input, Player * user){
   Position newPos;
 
   if(!combat_flag){
@@ -270,7 +270,7 @@ int handleInput(int input, Player * user){
   }
 }
 
-int checkPos(Position newPos, Player * user){
+void checkPos(Position newPos, Player * user){
   /* save old postions for functions */
   Position oldPos;
   oldPos.y = user->position.y;
@@ -305,7 +305,7 @@ int checkPos(Position newPos, Player * user){
   }
 }
 
-int playerMove(Position newPos, Player * user){
+void playerMove(Position newPos, Player * user){
   Position oldPos;
   oldPos.y = user->position.y;
   oldPos.x = user->position.x;
@@ -434,7 +434,7 @@ void crafting(Player * user){
 
 void clear_text(int y, int x, int end_x){
   int i = x;
-  for(i; i < end_x; i++){
+  for(; i < end_x; i++){
     if(mvinch(y, i))
       mvprintw(y, i, " ");
   }
@@ -458,7 +458,7 @@ void prep_enemies(){
   head_gob->next = NULL;
 }
 
-Goblin * goblin_spawn(Position pos, Goblin * head){
+void goblin_spawn(Position pos, Goblin * head){
 
   Goblin * current = head;
   /* handle first goblin */
@@ -587,6 +587,7 @@ void kill_gob(Goblin * gob){
 bool check_player_life(Player * user){
   if(user->health == 0)
     return false;
+  return true;
 }
 
 /* HANDLE HUD */

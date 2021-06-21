@@ -12,7 +12,7 @@ int screenSetUp(){
   return 0;
 }
 
-int colorSetUp() {
+void colorSetUp() {
   start_color();
   init_pair(EARTH_PAIR, COLOR_WHITE, COLOR_YELLOW);
   init_pair(ORE_PAIR, COLOR_WHITE, COLOR_MAGENTA);

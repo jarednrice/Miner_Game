@@ -21,4 +21,4 @@
 #define ENEMY_PAIR 9
 
 int screenSetUp();
-int colorSetUp();
+void colorSetUp();

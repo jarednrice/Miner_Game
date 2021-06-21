@@ -7,7 +7,5 @@ CFILES = main.c player_and_map.c graphics.c
 # libraries
 LIBS = -lncurses
 
-all: miner
-
-miner:
+prog:
 	$(CC) $(CFLAGS) $(CFILES) -o miner $(LIBS)
