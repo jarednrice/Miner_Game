@@ -620,12 +620,6 @@ void kill_gob(Goblin * gob){
   free(temp);
 }
 
-bool check_player_life(Player * user){
-  if(user->health == 0)
-    return false;
-  return true;
-}
-
 void turn_pause(unsigned int secs){
   unsigned int ret_time = time(0) + secs;
   while (time(0) < ret_time);
@@ -761,4 +755,21 @@ void HUD(Player * user){
   free(hp_string);
   free(full_money_string);
   free(money_string);
+}
+
+/* HANDLE GAME OVER */
+
+void game_over(Level * level){
+  int i = 0, j;
+  while(i < level->window.height){
+    j = 0;
+    while(j < level->window.width){
+      attron(COLOR_PAIR(TRAIL_PAIR));
+      mvprintw(i, j, " ");
+      attron(COLOR_PAIR(TRAIL_PAIR));
+      j++;
+    }
+    i++;
+  }
+  mvprintw(0, 0, "Game over!");
 }

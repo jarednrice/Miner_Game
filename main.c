@@ -25,11 +25,15 @@ int main(){
   goblins = get_goblins();
 
   /* main game loop */
-  while((ch = getch()) != 'q' && check_player_life(user)){
-    // check_player_life(user);
-    HUD(user);
-    handleInput(ch, user);
-    gob_move(goblins, level, user);
+  while((ch = getch()) != 'q'){
+    if(user->health <= 0){
+      game_over(level);
+    }
+    else{
+      HUD(user);
+      handleInput(ch, user);
+      gob_move(goblins, level, user);
+    }
   }
   endwin();
 

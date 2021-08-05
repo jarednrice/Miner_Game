@@ -60,5 +60,6 @@ Goblin * get_goblins();
 void gob_move(Goblin * gobs, Level * level, Player * user);
 void combat(Goblin * gob, Player * user);
 void kill_gob(Goblin * gob);
-bool check_player_life(Player * user);
 void turn_pause(unsigned int secs);
+
+void game_over(Level * level);
