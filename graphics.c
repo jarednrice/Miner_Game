@@ -23,5 +23,6 @@ void colorSetUp() {
   init_pair(SHOP_PAIR, COLOR_WHITE, COLOR_RED);
   init_pair(TREASURE_PAIR, COLOR_WHITE, COLOR_MAGENTA);
   init_pair(ENEMY_PAIR, COLOR_WHITE, COLOR_RED);
+  init_pair(TREASURE_PAIR, COLOR_WHITE, COLOR_MAGENTA);
   // clear();
 }

@@ -9,6 +9,7 @@
 #define SILVER 'S'
 #define TREASURE 'T'
 #define ENEMY '&'
+#define KEY 'K'
 
 #define EARTH_PAIR  1
 #define ORE_PAIR  2
@@ -19,6 +20,7 @@
 #define SHOP_PAIR 7
 #define TREASURE_PAIR 8
 #define ENEMY_PAIR 9
+#define KEY_PAIR 10
 
 int screenSetUp();
 void colorSetUp();

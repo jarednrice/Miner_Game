@@ -1,4 +1,5 @@
 #include "player_and_map.h"
+#include <time.h>
 
 /* GLOBAL VARIABLES */
 
@@ -30,15 +31,13 @@ Level * mapSetUp(){
   /* create and draw the buildings */
   newLevel->shop = shopSetup(newLevel);
 
-  int i;
-  int j;
-  int r;
-  int r_2;
+  int i, j, r, r_2, r_3;
 
   /* Loop to draw map. A bit hacked together */
   for(i = newLevel->window.height; i > newLevel->surface - 1; i--){
     r = rand() % (newLevel->window.width - 1);
     r_2 = rand() % (newLevel->window.width - 1);
+    r_3 = rand() % (newLevel->window.width - 1);
     for(j = 0; j < newLevel->window.width; j++){
       if(j == newLevel->window.width - 1){ // elevator at end of screen
         attron(COLOR_PAIR(ELEVATOR_PAIR));
@@ -69,6 +68,11 @@ Level * mapSetUp(){
       else if(j == r_2) { // ores
         attron(COLOR_PAIR(ORE_PAIR));
         mvprintw(i, j, "S");
+        attroff(COLOR_PAIR(ORE_PAIR));
+      }
+      else if(j == r_3) { // treasure chest key
+        attron(COLOR_PAIR(ORE_PAIR));
+        mvprintw(i, j, "K");
         attroff(COLOR_PAIR(ORE_PAIR));
       }
       else {  // everything else
@@ -112,6 +116,7 @@ void cave_gen(Level * level){
 
     /* drop point and increment */
     /* random chance that point is treasure */
+    /* also handles key creation */
     int t = rand() % 100;
     if(t == 1){
       attron(COLOR_PAIR(TREASURE_PAIR));
@@ -222,7 +227,7 @@ Player * playerSetup(Level * level){
   /* initialize building info that player must "know" */
   newPlayer->shop = level->shop;
 
-  /* initialize health, money, and inventory */
+  /* initialize health, money, and inventory etc */
   newPlayer->health = 20;
   newPlayer->money = 0;
   newPlayer->inventory[PICK_SLOT] = COP_PICK;  // start with copper pick axe
@@ -299,6 +304,11 @@ void checkPos(Position newPos, Player * user){
       else
         move(oldPos.y, oldPos.x);
       break;
+    case KEY:
+      if(mining(user, KEY))
+        playerMove(newPos, user);
+      else
+        move(oldPos.y, oldPos.x);
     default:
       move(oldPos.y, oldPos.x);
       break;
@@ -368,6 +378,14 @@ bool mining(Player * user, char ore){
     HUD(user);
     clear_text(1, 0, 30);
     mvprintw(1, 0, "Got silver ore!");
+    return true;
+  }
+  else if(ore == KEY && j >= COP_PICK){
+    int i = user->inventory[KEY_SLOT];
+    user->inventory[KEY_SLOT] = ++i;
+    HUD(user);
+    clear_text(1, 0, 30);
+    mvprintw(1, 0, "Got a key!");
     return true;
   }
   else
@@ -539,6 +557,7 @@ void combat(Goblin * gob, Player * user){
     switch (weapon) {
       case IRON_SWORD:
         gob->health -= 3;
+        turn_pause(1);
         break;
       case SILVER_SWORD:
         gob->health -= 5;
@@ -590,6 +609,11 @@ bool check_player_life(Player * user){
   return true;
 }
 
+void turn_pause(unsigned int secs){
+  unsigned int ret_time = time(0) + secs;
+  while (time(0) < ret_time);
+}
+
 /* HANDLE HUD */
 
 /* doesn't handle scenarios like mining or combat;
@@ -626,6 +650,19 @@ void HUD(Player * user){
   strcat(silver_string, num);
   clear_text(4, 0, final_length + 1);
   mvprintw(4, 0, silver_string);
+
+  /* keys */
+  char * key_string = (char*) malloc(7);
+  strcpy(key_string, "Keys: ");
+
+  length = snprintf(NULL, 0, "%d",  user->inventory[KEY_SLOT]);
+  snprintf(num, length + 1, "%d",  user->inventory[KEY_SLOT]);
+
+  final_length = strlen(key_string) + strlen(num);
+  key_string = (char*) realloc(key_string, final_length + 2);
+  strcat(key_string, num);
+  clear_text(5, 0, final_length + 1);
+  mvprintw(5, 0, key_string);
 
   /* pickaxe */
   char * pick_string = (char*) malloc(11);
