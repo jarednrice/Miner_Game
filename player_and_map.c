@@ -309,6 +309,12 @@ void checkPos(Position newPos, Player * user){
         playerMove(newPos, user);
       else
         move(oldPos.y, oldPos.x);
+      break;
+    case TREASURE:
+      if(mining(user, TREASURE))
+        playerMove(newPos, user);
+      else
+        move(oldPos.y, oldPos.x);
     default:
       move(oldPos.y, oldPos.x);
       break;
@@ -361,6 +367,7 @@ void playerMove(Position newPos, Player * user){
 
 bool mining(Player * user, char ore){
   int j = user->inventory[PICK_SLOT]; // what type of pick axe does the player have?
+  int k = user->inventory[KEY_SLOT]; // how many keys does the player have?
   /* clear extra chars for display message */
   clear_text(1, 0, 15);
 
@@ -386,6 +393,16 @@ bool mining(Player * user, char ore){
     HUD(user);
     clear_text(1, 0, 30);
     mvprintw(1, 0, "Got a key!");
+    return true;
+  }
+  else if(ore == TREASURE && k > 0){
+    int i = k;
+    user->inventory[KEY_SLOT] = --i;
+    int j = user->money;
+    user->money = ++j;
+    HUD(user);
+    clear_text(1, 0, 30);
+    mvprintw(1, 0, "Got some money!");
     return true;
   }
   else
