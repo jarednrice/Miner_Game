@@ -1,4 +1,4 @@
-#include "common.h"
+#include "../common.h"
 
 #define EARTH 'x'
 #define ELEVATOR '#'

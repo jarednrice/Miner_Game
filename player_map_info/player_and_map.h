@@ -1,7 +1,7 @@
-#include "common.h"
-#include "graphics.h"
+#include "../common.h"
+#include "../graphics/graphics.h"
 #include "inventory.h"
-#include "position_and_window.h"
+#include "../graphics/position_and_window.h"
 #include <string.h>
 
 typedef struct Shop{

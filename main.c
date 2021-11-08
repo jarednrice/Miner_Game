@@ -1,6 +1,6 @@
 #include "common.h"
-#include "graphics.h"
-#include "player_and_map.h"
+#include "graphics/graphics.h"
+#include "player_map_info/player_and_map.h"
 #include <math.h>
 
 int main(){
