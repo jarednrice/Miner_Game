@@ -3,4 +3,5 @@
 A simple, procedurally generated enviornment where a player can mine for resources and fight enemies. Programmed in C using the ncurses library.
 
 Playtested in the Ubuntu Linux xfce4 terminal emulator and the Ubuntu terminal client for Windows 10.
-![miner](https://user-images.githubusercontent.com/20401283/140838997-79d38832-3922-489c-88e6-1efd5643277e.png)
+![miner_2](https://user-images.githubusercontent.com/20401283/140839306-c821a5e3-bb3a-4f48-a93e-e53007ab812b.png)
+
